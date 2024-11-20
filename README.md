@@ -3,9 +3,103 @@
 
 ## Table of Contents
 
+- [Native](#Native)
 - [Flutter](#Flutter)
 - [Kotlin Multiplatform](#Kotlin-Multiplatform)
 - [React Native](#React-Native)
+
+## Native
+First we need overview android and ios platform architecture and APIs. 
+
+### Android
+
+![image](https://github.com/user-attachments/assets/fedd1aad-b6a7-4b96-b40d-3d4fcf837910)
+
+  #### 1. Linux Kernel
+  - Provides core functionalities like:
+    - **Security**.
+    - **Memory management**.
+    - **Process management**.
+    - **Networking stack**.
+  - Customized for Android with **Binder IPC** and **Power Management**.
+  
+  #### 2. Hardware Abstraction Layer (HAL)
+  - Acts as a bridge between hardware and software.
+  - Includes modules for audio, camera, sensors, Bluetooth, etc.
+  
+  #### 3. Android Runtime (ART)
+  - Executes apps using:
+    - **Ahead-of-Time (AOT)** and **Just-In-Time (JIT)** compilation.
+    - Optimized **Garbage Collection (GC)** for memory management.
+  
+  #### 4. Native Libraries
+  - Written in C/C++ to provide core features:
+    - **libc**: Standard C library.
+    - **OpenGL ES**: 2D/3D graphics rendering.
+    - **Media Framework**: Audio and video processing.
+    - **SQLite**: Database management.
+  
+  #### 5. Application Framework
+  - Supports app development with:
+    - **Activity Manager**: Manages app lifecycle.
+    - **Content Providers**: Shares data across apps.
+    - **Resource Manager**: Handles non-code resources.
+    - **Notification Manager**: Manages notifications.
+    - **View System**: For UI elements.
+  
+  #### 6. Applications
+  - The top layer where user-facing apps run.
+  - Written in **Java/Kotlin** and executed on ART.
+
+
+### IOS
+
+![image](https://github.com/user-attachments/assets/dda75dc3-0445-4050-9cd0-2f2e814a4b27)
+
+  #### 1. Core OS (Kernel Layer)
+  - Built on **Darwin** (Unix-based).
+  - Manages memory, processes, system security, and hardware communication.
+  
+  #### 2. Core Services
+  - Provides essential APIs, including:
+    - **Foundation**: Data and system task management.
+    - **Core Data**: Persistent data storage.
+    - **CloudKit**: Cloud synchronization.
+    - **Core Location**: GPS and location services.
+    - **Core Bluetooth**: Bluetooth management.
+  
+  #### 3. Media Layer
+  - Handles graphics, audio, and video using:
+    - **Quartz Core**: Graphics and effects.
+    - **Metal**: High-performance 2D/3D graphics.
+    - **AVFoundation**: Audio and video processing.
+    - **Core Animation**: Smooth UI effects.
+  
+  #### 4. Cocoa Touch (Application Layer)
+  - Provides frameworks for app development:
+    - **UIKit**: User interface design.
+    - **Event Kit**: Calendar and reminder management.
+    - **Push Notification Service**: Notifications.
+    - **ARKit**: Augmented reality features.
+  
+  5. Security
+  - Ensures robust protection:
+    - **Secure Boot**: Verifies system integrity.
+    - **Data Protection**: Encrypts user data.
+    - **App Sandbox**: Restricts app access to system resources.
+    - **Face ID/Touch ID**: Biometric authentication.
+
+### Compilation Process
+#### Android
+
+![image](https://github.com/user-attachments/assets/e4da5291-74c9-4e4e-b09c-300e0dea344f)
+
+#### IOS
+
+![image](https://github.com/user-attachments/assets/0d4490fd-ca4d-44aa-9266-a87bfd1f62f0)
+
+---
+
 
 ## Flutter
 
