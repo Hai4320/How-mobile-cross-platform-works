@@ -92,9 +92,13 @@ First we need overview android and ios platform architecture and APIs.
 ### Compilation Process
 #### Android
 
+Kotlin → Bytecode Java (.class) → Dalvik bytecode (.dex) → Machine Code (ART/Dalvik VM).
+
 ![image](https://github.com/user-attachments/assets/e4da5291-74c9-4e4e-b09c-300e0dea344f)
 
 #### IOS
+
+Swift → LLVM IR → Marchine Code
 
 ![image](https://github.com/user-attachments/assets/0d4490fd-ca4d-44aa-9266-a87bfd1f62f0)
 
