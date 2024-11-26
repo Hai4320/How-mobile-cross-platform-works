@@ -92,15 +92,12 @@ First we need overview android and ios platform architecture and APIs.
 ### Compilation Process
 #### Android
 
-Kotlin → Bytecode Java (.class) → Dalvik bytecode (.dex) → Machine Code (ART/Dalvik VM).
-
-![image](https://github.com/user-attachments/assets/e4da5291-74c9-4e4e-b09c-300e0dea344f)
+Kotlin/Java → Bytecode Java (kolinc/javac) → Dalvik bytecode (.dex)(D8/R8) → Machine Code (ART/Dalvik VM).
 
 #### IOS
 
-Swift → LLVM IR → Marchine Code
+Swift → LLVM IR(LLVM) → Marchine Code
 
-![image](https://github.com/user-attachments/assets/0d4490fd-ca4d-44aa-9266-a87bfd1f62f0)
 
 ---
 
@@ -114,8 +111,6 @@ Flutter is an open-source UI toolkit by Google for building cross-platform apps 
 **Here is Flutter Architectural layers**
 
 ![image](https://github.com/user-attachments/assets/07dbd1c1-81b2-4870-806f-b742a6bb1478)
-
-![image](https://github.com/user-attachments/assets/78cac3ac-cb95-4212-9c91-91b47675c8a8)
 
 - Flutter engine is The core of Flutter. Ưritten in C++ and supports the primitives necessary to support all Flutter applications.
 - The engine is responsible for rasterizing composited scenes whenever a new frame needs to be painted. It provides the low-level implementation of Flutter's core API, including graphics (through Impeller on iOS and coming to Android and macOS, and Skia on other platforms) text layout, file and network I/O, accessibility support, plugin architecture, and a Dart runtime and compile toolchain.**
