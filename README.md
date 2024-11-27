@@ -105,14 +105,16 @@ Swift → LLVM IR(LLVM) → Marchine Code
 ## Flutter
 
 Flutter is an open-source UI toolkit by Google for building cross-platform apps from a single codebase. Using the Dart language, Flutter lets developers create apps for Android, iOS, web, and desktop with high performance and beautiful UIs. Key features include customizable widgets and "hot reload," which allows real-time code changes, making development faster and more efficient.
-
+### Dart
+- JIT Compilation: During execution the dart program may be compiled into native code. Flutter using it during development(hot restart, hot reload).
+- AOT Compilation: The Dart code is fully compiled to machine code before execution. Production builds for optimized performance.
 ### Flutter engine
 
 **Here is Flutter Architectural layers**
 
 ![image](https://github.com/user-attachments/assets/07dbd1c1-81b2-4870-806f-b742a6bb1478)
 
-- Flutter engine is The core of Flutter. Ưritten in C++ and supports the primitives necessary to support all Flutter applications.
+- Flutter engine is The core of Flutter. Written in C++ and supports the primitives necessary to support all Flutter applications.
 - The engine is responsible for rasterizing composited scenes whenever a new frame needs to be painted. It provides the low-level implementation of Flutter's core API, including graphics (through Impeller on iOS and coming to Android and macOS, and Skia on other platforms) text layout, file and network I/O, accessibility support, plugin architecture, and a Dart runtime and compile toolchain.**
 
 **Main components**
@@ -143,8 +145,16 @@ Flutter is an open-source UI toolkit by Google for building cross-platform apps 
 =>  That why app flutter is heavy than native app.
 
 ### UI
-- Flutter doesn’t use native UI components; instead, it renders all components using Graphics Rendering (Skia/Impeller).
-
+- Flutter doesn’t use native UI components; instead, it renders all components using Graphics Rendering (Skia/Impeller). 
+- Until now Flutter is using Skia - an open source rendering engine developed by Google. Skia is designed to support high-speed 2D graphics rendering on multiple platforms, including Android, iOS, macOS, Windows, Linux, and even web browsers, but some feature isn't alway optimized for Flutter => Flutter need a new rendering engine that is Impeller.
+- Impeller is a rendering optimization introduced by the Flutter team. Impeller is aimed at improving rendering performance, particularly on mobile devices.
+- Graphics Rendering (Skia/Impeller) is part of Flutter Engine.
+- How it work?
+**Android**
+XML: View/ViewGroup -> Display List -> Rendering Thread -> OpenGL -> GPU -> Display
+Compose UI: Composition ->  Display List -> Rendering Thread -> Skia -> GPU -> Display
+**IOS**  
+**Flutter**
 ## Kotlin Multiplatform
 
 
