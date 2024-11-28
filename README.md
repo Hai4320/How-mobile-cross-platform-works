@@ -92,12 +92,11 @@ First we need overview android and ios platform architecture and APIs.
 ### Compilation Process
 #### Android
 
-Kotlin/Java → Bytecode Java (kolinc/javac) → Dalvik bytecode (.dex)(D8/R8) → Machine Code (ART/Dalvik VM).
+Kotlin/Java → Bytecode Java(kolinc/javac) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
 
 #### IOS
 
-Swift → LLVM IR(LLVM) → Marchine Code
-
+Swift/Object C → LLVM IR(CLang) → Assembly(LLVM) -> Ipa ->  Machine Code(Assembler) -> CPU/GPU
 
 ---
 
@@ -106,8 +105,11 @@ Swift → LLVM IR(LLVM) → Marchine Code
 
 Flutter is an open-source UI toolkit by Google for building cross-platform apps from a single codebase. Using the Dart language, Flutter lets developers create apps for Android, iOS, web, and desktop with high performance and beautiful UIs. Key features include customizable widgets and "hot reload," which allows real-time code changes, making development faster and more efficient.
 ### Dart
+Dart compiles directly into machine code by Dart VM
 - JIT Compilation: During execution the dart program may be compiled into native code. Flutter using it during development(hot restart, hot reload).
 - AOT Compilation: The Dart code is fully compiled to machine code before execution. Production builds for optimized performance.
+=> Flutter APK and ipa contain machine code.
+
 ### Flutter engine
 
 **Here is Flutter Architectural layers**
