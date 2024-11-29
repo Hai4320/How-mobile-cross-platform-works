@@ -1,5 +1,8 @@
 # How Does Cross-Platform Mobile App Work?
 
+- Compilation process on android/ios device.
+- How it render UI.
+- Connect to native API.
 
 ## Table of Contents
 
@@ -152,11 +155,18 @@ Dart compiles directly into machine code by Dart VM
 - Impeller is a rendering optimization introduced by the Flutter team. Impeller is aimed at improving rendering performance, particularly on mobile devices.
 - Graphics Rendering (Skia/Impeller) is part of Flutter Engine.
 - How it work?
+
 **Android**
-XML: View/ViewGroup -> Display List -> Rendering Thread -> OpenGL -> GPU -> Display
-Compose UI: Composition ->  Display List -> Rendering Thread -> Skia -> GPU -> Display
+
+XML: XML Layout -> LayoutInflater -> Measure & Layout -> Drawing(Canvas) -> DisplayList -> OpenGL + GPU -> Display.
+
+Compose UI: Composition -> Composition Tree -> Layout Phase -> Draw(Canvas + Skia) -> Skia + GPU -> Display.
+
 **IOS**  
+
 **Flutter**
+Widget -> Widget Tree -> RenderObject -> Paint(Canvas + Impeller) -> Impeller + GPU -> Display.
+
 ## Kotlin Multiplatform
 
 
