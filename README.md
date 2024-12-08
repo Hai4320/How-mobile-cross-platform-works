@@ -33,9 +33,8 @@
 ### 2. UI
 - Android:
 
-       XML: XML Layout -> LayoutInflater -> Measure & Layout -> Drawing(Canvas) -> DisplayList -> OpenGL + GPU -> Display.
-   
-       Compose UI: Composition -> Composition Tree -> Layout Phase -> Draw(Canvas + Skia) -> Skia + GPU -> Display.
+       XML: XML Layout -> AndroidView -> Measure & Layout -> Drawing(Canvas) -> DisplayList -> OpenGL + GPU -> Display.
+
 
 - IOS:
     
@@ -222,7 +221,61 @@ Move to the next frame work
 - Open-source technology by JetBrains
 - Allows you to share code across different platforms.
 
+### Kotlin compiles 
 
+KMM Idea is allows you to share code across different platforms.
+=> It mean in KMM project native code and and Kotlin code work together on same thread.
+So how it work?
+
+**Android**
+Android mobile development has been Kotlin-first since Google I/O in 2019
+
+    Kotlin → Bytecode Java(kolinc - Jvm ) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
+
+Kotlinc can compile Kotlin into Bytecode Java so that other task base on Android native
+
+ 
+**IOS**
+
+- Kotlin/Native is a technology for compiling Kotlin code to native binaries which can run without a virtual machine. Kotlin/Native includes an LLVM-based backend for the Kotlin compiler and a native implementation of the Kotlin standard library.
+- It is easy to include compiled Kotlin code in existing projects written in C, C++, Swift, Objective-C, and other languages. It is also easy to use existing native code, static or dynamic C libraries, Swift/Objective-C frameworks, graphical engines, and anything else directly from Kotlin/Native.
+- Kotlin/Native supports the following platforms:
+    - macOS
+    - iOS, tvOS, watchOS
+    - Linux
+    - Windows (MinGW)
+    - Android NDK
+
+            Kotlin → LLVM IR(kolinc - Kotlin\Native) → Assembly(LLVM) -> Ipa ->  Machine Code(Assembler) -> CPU/GPU
+
+** How to let Kotlin-c know and compile to correct target? **
+- You should first declare a target to instruct Kotlin to compile code for that specific target. In Gradle, you declare targets using predefined DSL calls inside the kotlin {} block:
+
+![image](https://github.com/user-attachments/assets/28ae94b5-e258-45c0-b88e-19b3112a8cbd)
+
+![image](https://github.com/user-attachments/assets/d8d1bf71-c270-48a4-bfd1-6893f06d6c83)
+
+### Compose multiplatform
+- Declarative framework for sharing UIs across multiple platforms. Based on Kotlin Multiplatform and Jetpack Compose
+- Compose Multiplatform shares most of its API with Jetpack Compose, the Android UI framework developed by Google. You can use the same APIs to build user interfaces for both Android and iOS.
+- Compose Multiplatform utilizes Skia under the hood to render the UI, a powerful 2D graphics library developed by Google. 
+- Skia’s versatility enables it to work seamlessly across various platforms. 
+- Interestingly, Skia is also the underlying rendering engine for Flutter, Google’s cross-platform UI toolkit. 
+- Jetpack Compose, Google’s UI toolkit for Android, also relies on Skia for rendering, although indirectly. 
+- However, Compose Multiplatform, developed by JetBrains, employs a Kotlin multiplatform library called Skiko. 
+- Skiko serves as a wrapper for the Skia library, tailored specifically for Kotlin. 
+- In essence, Skiko provides the bridge between Kotlin Multiplatform and Skia, enabling developers to leverage the power of Skia for rendering UI components in their cross-platform projects seamlessly.
+
+       Compose UI: Composition -> (?) -> Layout Phase -> Draw(Canvas + Skiko) -> Skiko + GPU -> Display.
+
+### KMM library
+- KMM support some libs which support iOS and Android targets: https://github.com/terrakok/kmp-awesome
+
+- How to use Android only/IOS only libs on KMM project
+
+Why Compose multiplatform is Beta?
+
+_**If apple won't fuck it up and prevent JetBrains from developing compose support for iOS then I think it has higher chances of success than flutter and react.**_
 
 ## React Native
 
