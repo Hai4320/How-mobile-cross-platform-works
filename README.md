@@ -129,8 +129,13 @@
 
 ## Flutter
 
-Flutter is an open-source UI toolkit by Google for building cross-platform apps from a single codebase. Using the Dart language, Flutter lets developers create apps for Android, iOS, web, and desktop with high performance and beautiful UIs. Key features include customizable widgets and "hot reload," which allows real-time code changes, making development faster and more efficient.
+- Flutter is an open source framework for building beautiful, natively compiled, multi-platform applications from a single codebase.
+- Supported by Google
+- Using the Dart language, Flutter lets developers create apps for Android, iOS, web, and desktop with high performance and beautiful UIs. 
+- Key features include customizable widgets and "hot reload," which allows real-time code changes, making development faster and more efficient.
+
 ### Dart and Dart compiler.
+
 Dart compiles directly into machine code by Dart VM
 - JIT Compilation: During execution the dart program may be compiled into native code. Flutter using it during development(hot restart, hot reload).
 - AOT Compilation: The Dart code is fully compiled to machine code before execution. Production builds for optimized performance.
@@ -194,12 +199,30 @@ Flutter platform channels:
     - MethodChannel
     - EventChannel
     - BasicMessageChannel
+- The Flutter portion of the app sends messages to its host, the non-Dart portion of the app, over a platform channel.
+- The host listens on the platform channel, and receives the message. It then calls into any number of platform-specific APIs—using the native programming language—and sends a response back to the client, the Flutter portion of the app
+- The standard platform channels use a standard message codec that supports efficient binary serialization of simple JSON-like values, such as booleans, numbers, Strings, byte buffers, and Lists and Maps of these
+- Kotlin or Java on Android
+- Swift or Objective-C on iOS
+What about lower level of native API like Native Libraries or HLA?
+ => Dart FFI: Dart mobile, command-line, and server apps running on the Dart Native platform can use the dart:ffi library to call native C APIs, and to read, write, allocate, and deallocate native memory. 
+- Write C code to call native C APIs.
+- Compile
+    - .so for Android
+    - .dylib for IOS
+- load and use on code dart
+  ![image](https://github.com/user-attachments/assets/2ba86864-791b-4c3b-b424-327eba6f6d8e)
 
+Move to the next frame work
 
 ## Kotlin Multiplatform
 
 
-Kotlin Multiplatform is a feature from JetBrains that enables developers to use Kotlin for building cross-platform applications. It allows you to share code across multiple platforms, including Android, iOS, web, and desktop, while still using platform-specific code where needed. By sharing common business logic and using Kotlin’s interoperability with Java and Swift, Kotlin Multiplatform helps streamline development and reduce duplicated code. It's especially popular for mobile development, where a single codebase can handle both Android and iOS, increasing efficiency and reducing maintenance.
+- Kotlin Multiplatform is a technology that allows you to create applications for various platforms and efficiently reuse code across them while retaining the benefits of native programming
+- Open-source technology by JetBrains
+- Allows you to share code across different platforms.
+
+
 
 ## React Native
 
