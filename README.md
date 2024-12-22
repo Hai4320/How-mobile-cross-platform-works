@@ -1,7 +1,6 @@
 # How Does Cross-Platform Mobile App Work?
 
-- Explain Cross-Platform compilation processs on Android/Ios device.
-- How Cross-Platform render UI and connect to Native API.
+- How cross-platform like Flutter, KMM work on each mobile platform, such as Android and iOS.
 - Compare between Cross-Platform vs Native App and Cross-Platform together.
 
 ## Table of Contents
@@ -13,31 +12,46 @@
 
 ## Native
 
-- First we need overview android and ios platform architecture and APIs. 
+First we need overview Android and IOS platform architecture. 
 
 ### 1. Compilation Process
 
+**What is Compilation Process:**
 
-![image](https://github.com/user-attachments/assets/b1c4a273-e0a2-4370-9a0b-708277584116)
+<img src="https://github.com/user-attachments/assets/b1c4a273-e0a2-4370-9a0b-708277584116" width="500"/>
+
+- Machine Language (Binary Code): is the lowest-level programming language, consisting entirely of binary numbers (0s and 1s) that a computer's CPU can execute directly. It is the most fundamental language of computers and is specific to the architecture of the machine's processor.
+- Assembly Language:  a low-level programming language that uses human-readable mnemonics (e.g., MOV, ADD, JMP) to represent machine code instructions. It is processor-specific and provides direct access to hardware resources like CPU registers and memory.
+- High-Level Programming Languages: programming languages that are designed to be easy for humans to read and write.
+- Compilation Process is the series of steps that a compiler performs to translate source code written in a high-level programming language (like C++, Java, or Python) into machine code (binary instructions) that a computer's processor can execute
 
 #### Android
 
     Kotlin/Java → Bytecode Java(kolinc/javac) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
-
+_APK contain DEX !_
 #### IOS
 
     Swift/Object C → LLVM IR(CLang) → Assembly(LLVM) -> Ipa ->  Machine Code(Assembler) -> CPU/GPU
+_IPA contain Assembly !_
+
 
 ---
 
 ### 2. UI
+
+Render UI pineline on native app?
+
+<img src="https://github.com/user-attachments/assets/2de12413-5099-4a52-a264-626e906fbe48" width="500"/>
+
+
 - Android:
 
-       XML: XML Layout -> AndroidView -> Measure & Layout -> Drawing(Canvas) -> DisplayList -> OpenGL + GPU -> Display.
+       XML: XML Layout -> AndroidView -> Measure & Layout -> Drawing(Canvas) -> OpenGL ES API + GPU -> Screen.
 
 
 - IOS:
     
+       Swift UI: View -> View Tree -> Geometry, Constraints -> Draw (Core Animation, Core Graphics) -> GPU + Metal API -> Screen.
 ---
 
 
