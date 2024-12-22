@@ -1,8 +1,13 @@
 # How Does Cross-Platform Mobile App Work?
-
-- How cross-platform like Flutter, KMM work on each mobile platform, such as Android and iOS.
+This documment is my personal reserch about mobile crossplatform frameworks, 
+in this doccument I will:
+- Explain how cross-platform like Flutter, KMM work on each mobile platform, such as Android and iOS.
 - Compare between Cross-Platform vs Native App and Cross-Platform together.
 
+_Please give me some feedback if you have any concerns. 
+It will help me become a better developer. :))_
+
+Thank you so much!
 ## Table of Contents
 
 - [Native](#Native)
@@ -48,93 +53,38 @@ Render UI pineline on native app?
 
        XML: XML Layout -> AndroidView -> Measure & Layout -> Drawing(Canvas) -> OpenGL ES API + GPU -> Screen.
 
+OpenGL ES (Open Graphics Library for Embedded Systems) is a lightweight version of OpenGL designed for embedded devices like smartphones, tablets, and gaming consoles. It provides a cross-platform API for rendering 2D and 3D graphics, optimized for low-power and resource-constrained environments. Managed by the Khronos Group, it is widely used in mobile gaming, AR/VR applications, and interactive graphical user interface
 
 - IOS:
     
        Swift UI: View -> View Tree -> Geometry, Constraints -> Draw (Core Animation, Core Graphics) -> GPU + Metal API -> Screen.
+
+Metal is a high-performance graphics and computing API developed by Apple, optimized for iOS, macOS, and other Apple devices.
+
 ---
 
 
 ### 3. Native API
 
+Where is Native API on platform achitecture ?
+
 #### Android
 
-![image](https://github.com/user-attachments/assets/fedd1aad-b6a7-4b96-b40d-3d4fcf837910)
+<img src="https://github.com/user-attachments/assets/fedd1aad-b6a7-4b96-b40d-3d4fcf837910" width="500"/>
 
-    1. Linux Kernel
-    - Provides core functionalities like:
-      - Security.
-      - Memory management.
-      - Process management.
-      - Networking stack.
-    - Customized for Android with **Binder IPC** and **Power Management**.
-    
-    2. Hardware Abstraction Layer (HAL)
-    - Acts as a bridge between hardware and software.
-    - Includes modules for audio, camera, sensors, Bluetooth, etc.
-    
-    3. Android Runtime (ART)
-    - Executes apps using:
-      - Ahead-of-Time (AOT) and Just-In-Time (JIT) compilation.
-      - Optimized Garbage Collection (GC) for memory management.
-    
-    4. Native Libraries
-    - Written in C/C++ to provide core features:
-      - libc: Standard C library.
-      - OpenGL ES: 2D/3D graphics rendering.
-      - Media Framework: Audio and video processing.
-      - SQLite: Database management.
-    
-    5. Application Framework
-    - Supports app development with:
-      - Activity Manager: Manages app lifecycle.
-      - Content Providers: Shares data across apps.
-      - Resource Manager: Handles non-code resources.
-      - Notification Manager: Manages notifications.
-      - View System: For UI elements.
-    
-    6. Applications
-    - The top layer where user-facing apps run.
-    - Written in **Java/Kotlin** and executed on ART.
-
+- Java API Framework
+- Native C++ Libraries
+- HAL
+- Third-party libraries
 
 #### IOS
 
-![image](https://github.com/user-attachments/assets/dda75dc3-0445-4050-9cd0-2f2e814a4b27)
+<img src="https://github.com/user-attachments/assets/dda75dc3-0445-4050-9cd0-2f2e814a4b27" width="500"/>
 
-      1. Core OS (Kernel Layer)
-      - Built on Darwin (Unix-based).
-      - Manages memory, processes, system security, and hardware communication.
-      
-      2. Core Services
-      - Provides essential APIs, including:
-        - Foundation: Data and system task management.
-        - Core Data: Persistent data storage.
-        - CloudKit: Cloud synchronization.
-        - Core Location: GPS and location services.
-        - Core Bluetooth: Bluetooth management.
-      
-      3. Media Layer
-      - Handles graphics, audio, and video using:
-        - Quartz Core: Graphics and effects.
-        - Metal: High-performance 2D/3D graphics.
-        - AVFoundation: Audio and video processing.
-        - Core Animation: Smooth UI effects.
-      
-      4. Cocoa Touch (Application Layer)
-      - Provides frameworks for app development:
-        - UIKit: User interface design.
-        - Event Kit: Calendar and reminder management.
-        - Push Notification Service: Notifications.
-        - ARKit: Augmented reality features.
-      
-      5. Security
-      - Ensures robust protection:
-        - Secure Boot: Verifies system integrity.
-        - Data Protection: Encrypts user data.
-        - App Sandbox: Restricts app access to system resources.
-        - Face ID/Touch ID: Biometric authentication.
-
+- Cocoa/Cocoa Touch
+- Media
+- Core service
+- Third-party libraries
 
 
 ---
@@ -152,13 +102,17 @@ Render UI pineline on native app?
 Dart compiles directly into machine code by Dart VM
 - JIT Compilation: During execution the dart program may be compiled into native code. Flutter using it during development(hot restart, hot reload).
 - AOT Compilation: The Dart code is fully compiled to machine code before execution. Production builds for optimized performance.
-=> Flutter APK and ipa contain machine code.
+
+=> Flutter APK and Ipa contain machine code.
+=> Flutter app usually heavy than native app.
 
 ### Flutter engine
 
 **Here is Flutter Architectural layers**
 
-![image](https://github.com/user-attachments/assets/07dbd1c1-81b2-4870-806f-b742a6bb1478)
+<img src="https://github.com/user-attachments/assets/07dbd1c1-81b2-4870-806f-b742a6bb1478" height="500"/>
+
+<img src="https://github.com/user-attachments/assets/12515791-c0a8-4b81-a030-f4f833747011" height="500"/>
 
 - Flutter engine is The core of Flutter. Written in C++ and supports the primitives necessary to support all Flutter applications.
 - The engine is responsible for rasterizing composited scenes whenever a new frame needs to be painted. It provides the low-level implementation of Flutter's core API, including graphics (through Impeller on iOS and coming to Android and macOS, and Skia on other platforms) text layout, file and network I/O, accessibility support, plugin architecture, and a Dart runtime and compile toolchain.**
@@ -188,18 +142,20 @@ Dart compiles directly into machine code by Dart VM
   - The Dart runtime to execute application logic.
   - Platform channels for native communication.
 
-=>  That why app flutter is heavy than native app.
-
 ### Render UI
-- Flutter doesn’t use native UI components; instead, it renders all components using Graphics Rendering (Skia/Impeller). 
-- Until now Flutter is using Skia - an open source rendering engine developed by Google. Skia is designed to support high-speed 2D graphics rendering on multiple platforms, including Android, iOS, macOS, Windows, Linux, and even web browsers, but some feature isn't alway optimized for Flutter => Flutter need a new rendering engine that is Impeller.
+
+- Flutter doesn’t use native UI components, instead it renders all components using Graphics Rendering (Skia/Impeller). 
+- Until now Flutter is using Skia - an open source rendering engine developed by Google. 
+- Skia is designed to support high-speed 2D graphics rendering on multiple platforms, including Android, iOS, macOS, Windows, Linux, and even web browsers, but some feature isn't alway optimized for Flutter => => Flutter need a new rendering engine that is Impeller.
 - Impeller is a rendering optimization introduced by the Flutter team. Impeller is aimed at improving rendering performance, particularly on mobile devices.
 - Graphics Rendering (Skia/Impeller) is part of Flutter Engine.
 - How it work?
 
       Widget -> Widget Tree -> RenderObject -> Paint(Canvas + Impeller) -> Impeller + GPU -> Display.
 
-- Beside that flutter support platform views(AndroidView, UiKitView) come with performance trade-offs.
+- Android: Impeller supports both Vulkan and Open GL ES rendering on Android. Impeller will prefer rendering with Vulkan and fallback to OpenGL ES 2.0 for compatibility
+- Ios: Metal API
+
 ---
 
 ### Native UI
@@ -212,6 +168,7 @@ Flutter platform channels:
     - MethodChannel
     - EventChannel
     - BasicMessageChannel
+
 - The Flutter portion of the app sends messages to its host, the non-Dart portion of the app, over a platform channel.
 - The host listens on the platform channel, and receives the message. It then calls into any number of platform-specific APIs—using the native programming language—and sends a response back to the client, the Flutter portion of the app
 - The standard platform channels use a standard message codec that supports efficient binary serialization of simple JSON-like values, such as booleans, numbers, Strings, byte buffers, and Lists and Maps of these
@@ -219,14 +176,15 @@ Flutter platform channels:
 - Swift or Objective-C on iOS
 What about lower level of native API like Native Libraries or HLA?
  => Dart FFI: Dart mobile, command-line, and server apps running on the Dart Native platform can use the dart:ffi library to call native C APIs, and to read, write, allocate, and deallocate native memory. 
-- Write C code to call native C APIs.
+- Write C/C++ module.
 - Compile
     - .so for Android
     - .dylib for IOS
 - load and use on code dart
+
   ![image](https://github.com/user-attachments/assets/2ba86864-791b-4c3b-b424-327eba6f6d8e)
 
-Move to the next frame work
+Move to the next frameworks
 
 ## Kotlin Multiplatform
 
@@ -238,13 +196,14 @@ Move to the next frame work
 ### Kotlin compiles 
 
 KMM Idea is allows you to share code across different platforms.
-=> It mean in KMM project native code and and Kotlin code work together on same thread.
+=> It mean in KMM project native code and and Kotlin code work together.
 So how it work?
 
 **Android**
-Android mobile development has been Kotlin-first since Google I/O in 2019
+- Android mobile development has been Kotlin-first since Google I/O in 2019
+- Kotlinc can compile Kotlin into Bytecode Java so that other task base on Android native
 
-    Kotlin → Bytecode Java(kolinc - Jvm ) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
+        Kotlin → Bytecode Java(kolinc - Jvm ) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
 
 Kotlinc can compile Kotlin into Bytecode Java so that other task base on Android native
 
