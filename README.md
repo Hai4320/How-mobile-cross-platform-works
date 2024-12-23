@@ -239,7 +239,7 @@ Kotlinc can compile Kotlin into Bytecode Java so that other task base on Android
 - Skiko serves as a wrapper for the Skia library, tailored specifically for Kotlin. 
 - In essence, Skiko provides the bridge between Kotlin Multiplatform and Skia, enabling developers to leverage the power of Skia for rendering UI components in their cross-platform projects seamlessly.
 
-       Compose UI: Composition -> (?) -> Layout Phase -> Draw(Canvas + Skiko) -> Skiko + GPU -> Display.
+       Compose UI: Composition -> Composition Tree -> Layout Phase -> Draw(Canvas + Skiko) -> Skiko + GPU -> Display.
 
 ### KMM library
 - KMM support some libs which support iOS and Android targets: https://github.com/terrakok/kmp-awesome
