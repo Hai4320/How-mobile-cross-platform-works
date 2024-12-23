@@ -244,14 +244,7 @@ Kotlin/Native provides bidirectional interoperability with Swift/Objective-C. Yo
 
        Compose UI: Composition -> Composition Tree -> Layout Phase -> Draw(Canvas + Skiko) -> Skiko + GPU -> Display.
 
-### KMM library
-- KMM support some libs which support iOS and Android targets: https://github.com/terrakok/kmp-awesome
 
-- How to use Android only/IOS only libs on KMM project
-
-Why Compose multiplatform is Beta?
-
-_**If apple won't fuck it up and prevent JetBrains from developing compose support for iOS then I think it has higher chances of success than flutter and react.**_
 
 ## React Native
 
