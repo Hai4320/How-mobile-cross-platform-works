@@ -17,7 +17,7 @@ Thank you so much!
 
 ## Native
 
-First we need overview Android and IOS platform architecture. 
+First we will overview about Android and IOS platform architecture. 
 
 ### 1. Compilation Process
 
@@ -29,6 +29,8 @@ First we need overview Android and IOS platform architecture.
 - Assembly Language:  a low-level programming language that uses human-readable mnemonics (e.g., MOV, ADD, JMP) to represent machine code instructions. It is processor-specific and provides direct access to hardware resources like CPU registers and memory.
 - High-Level Programming Languages: programming languages that are designed to be easy for humans to read and write.
 - Compilation Process is the series of steps that a compiler performs to translate source code written in a high-level programming language (like C++, Java, or Python) into machine code (binary instructions) that a computer's processor can execute
+
+So how to compile code on Android and IOS?
 
 #### Android
 
