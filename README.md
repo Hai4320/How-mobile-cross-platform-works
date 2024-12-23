@@ -205,7 +205,7 @@ So how it work?
 
         Kotlin → Bytecode Java(kolinc - Jvm ) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
 
-Kotlinc can compile Kotlin into Bytecode Java so that other task base on Android native
+Java code can be called from Kotlin in a natural way, and Kotlin code can be used from Java rather smoothly as well
 
  
 **IOS**
@@ -220,6 +220,9 @@ Kotlinc can compile Kotlin into Bytecode Java so that other task base on Android
     - Android NDK
 
             Kotlin → LLVM IR(kolinc - Kotlin\Native) → Assembly(LLVM) -> Ipa ->  Machine Code(Assembler) -> CPU/GPU
+
+Kotlin/Native provides bidirectional interoperability with Swift/Objective-C. You can both use Objective-C frameworks and libraries in Kotlin code, and Kotlin modules in Swift/Objective-C code.
+
 
 ** How to let Kotlin-c know and compile to correct target? **
 - You should first declare a target to instruct Kotlin to compile code for that specific target. In Gradle, you declare targets using predefined DSL calls inside the kotlin {} block:
