@@ -1,7 +1,7 @@
 # How Does Cross-Platform Mobile App Work?
-This document is my reserch about mobile cross-platform frameworks, 
+This document is my research about mobile cross-platform frameworks, 
 in this document I will:
-- Explain how cross-platform like Flutter, Kotlin Multiplatfom work on each mobile platform, such as Android and iOS.
+- Explain how cross-platform like Flutter and Kotlin Multiplatform work on each mobile platform, such as Android and iOS.
 - Compare Cross-Platform vs Native App and Cross-Platform.
 
 _Please give me some feedback if you have any concerns. 
@@ -46,7 +46,7 @@ _IPA contains Assembly !_
 
 ### 2. UI
 
-Render UI pineline on native app?
+Render UI pineline on the native app?
 
 <img src="https://github.com/user-attachments/assets/2de12413-5099-4a52-a264-626e906fbe48" width="500"/>
 
@@ -68,7 +68,7 @@ Metal is a high-performance graphics and computing API developed by Apple, optim
 
 ### 3. Native API
 
-Where is Native API on platform achitecture ?
+Where is Native API on platform architecture?
 
 #### Android
 
@@ -103,21 +103,21 @@ Where is Native API on platform achitecture ?
 
 Dart compiles directly into machine code by Dart VM
 - JIT Compilation: During execution the dart program may be compiled into native code. Flutter using it during development(hot restart, hot reload).
-- AOT Compilation: The Dart code is fully compiled to machine code before execution. Production builds for optimized performance.
+- AOT Compilation: The Dart code is fully compiled into machine code before execution. Production builds for optimized performance.
 
 => Flutter APK and Ipa contain machine code.
-=> Flutter app usually heavy than native app.
+=> Flutter app is usually heavier than a native app.
 
 ### Flutter engine
 
-**Here is Flutter Architectural layers**
+**Here are Flutter Architectural layers**
 
 <img src="https://github.com/user-attachments/assets/07dbd1c1-81b2-4870-806f-b742a6bb1478" height="500"/>
 
 <img src="https://github.com/user-attachments/assets/12515791-c0a8-4b81-a030-f4f833747011" height="500"/>
 
 - Flutter engine is The core of Flutter. Written in C++ and supports the primitives necessary to support all Flutter applications.
-- The engine is responsible for rasterizing composited scenes whenever a new frame needs to be painted. It provides the low-level implementation of Flutter's core API, including graphics (through Impeller on iOS and coming to Android and macOS, and Skia on other platforms) text layout, file and network I/O, accessibility support, plugin architecture, and a Dart runtime and compile toolchain.**
+- The engine is responsible for rasterizing composited scenes whenever a new frame needs to be painted. It provides the low-level implementation of Flutter's core API, including graphics (through Impeller on iOS and coming to Android and macOS, and Skia on other platforms) text layout, file and network I/O, accessibility support, plugin architecture, and Dart runtime and compile toolchain.**
 
 **Main components**
 
@@ -146,12 +146,12 @@ Dart compiles directly into machine code by Dart VM
 
 ### Render UI
 
-- Flutter doesn’t use native UI components, instead it renders all components using Graphics Rendering (Skia/Impeller). 
-- Until now Flutter is using Skia - an open source rendering engine developed by Google. 
+- Flutter doesn’t use native UI components, instead, it renders all components using Graphics Rendering (Skia/Impeller). 
+- Until now Flutter is using Skia - an open-source rendering engine developed by Google. 
 - Skia is designed to support high-speed 2D graphics rendering on multiple platforms, including Android, iOS, macOS, Windows, Linux, and even web browsers, but some feature isn't alway optimized for Flutter => => Flutter need a new rendering engine that is Impeller.
 - Impeller is a rendering optimization introduced by the Flutter team. Impeller is aimed at improving rendering performance, particularly on mobile devices.
 - Graphics Rendering (Skia/Impeller) is part of Flutter Engine.
-- How it work?
+- How does it work?
 
       Widget -> Widget Tree -> RenderObject -> Paint(Canvas + Impeller) -> Impeller + GPU -> Display.
 
@@ -172,11 +172,11 @@ Flutter platform channels:
     - BasicMessageChannel
 
 - The Flutter portion of the app sends messages to its host, the non-Dart portion of the app, over a platform channel.
-- The host listens on the platform channel, and receives the message. It then calls into any number of platform-specific APIs—using the native programming language—and sends a response back to the client, the Flutter portion of the app
+- The host listens on the platform channel and receives the message. It then calls into any number of platform-specific APIs—using the native programming language—and sends a response back to the client, the Flutter portion of the app
 - The standard platform channels use a standard message codec that supports efficient binary serialization of simple JSON-like values, such as booleans, numbers, Strings, byte buffers, and Lists and Maps of these
 - Kotlin or Java on Android
 - Swift or Objective-C on iOS
-What about lower level of native API like Native Libraries or HLA?
+What about a lower level of native API like Native Libraries or HLA?
  => Dart FFI: Dart mobile, command-line, and server apps running on the Dart Native platform can use the dart:ffi library to call native C APIs, and to read, write, allocate, and deallocate native memory. 
 - Write C/C++ module.
 - Compile
@@ -207,12 +207,12 @@ So how does it work?
 
         Kotlin → Bytecode Java(kolinc - Jvm ) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
 
-Java code can be called from Kotlin in a natural way, and Kotlin code can be used from Java rather smoothly as well
+Java code can be naturally called from Kotlin, and Kotlin code can be used from Java rather smoothly as well
 
  
 **IOS**
 
-- Kotlin/Native is a technology for compiling Kotlin code to native binaries which can run without a virtual machine. Kotlin/Native includes an LLVM-based backend for the Kotlin compiler and a native implementation of the Kotlin standard library.
+- Kotlin/Native is a technology for compiling Kotlin code to native binaries that can run without a virtual machine. Kotlin/Native includes an LLVM-based backend for the Kotlin compiler and a native implementation of the Kotlin standard library.
 - It is easy to include compiled Kotlin code in existing projects written in C, C++, Swift, Objective-C, and other languages. It is also easy to use existing native code, static or dynamic C libraries, Swift/Objective-C frameworks, graphical engines, and anything else directly from Kotlin/Native.
 - Kotlin/Native supports the following platforms:
     - macOS
