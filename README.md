@@ -1,8 +1,8 @@
 # How Does Cross-Platform Mobile App Work?
-This documment is my personal reserch about mobile crossplatform frameworks, 
-in this doccument I will:
-- Explain how cross-platform like Flutter, KMM work on each mobile platform, such as Android and iOS.
-- Compare between Cross-Platform vs Native App and Cross-Platform together.
+This document is my reserch about mobile cross-platform frameworks, 
+in this document I will:
+- Explain how cross-platform like Flutter, Kotlin Multiplatfom work on each mobile platform, such as Android and iOS.
+- Compare Cross-Platform vs Native App and Cross-Platform.
 
 _Please give me some feedback if you have any concerns. 
 It will help me become a better developer. :))_
@@ -17,11 +17,11 @@ Thank you so much!
 
 ## Native
 
-First we will overview about Android and IOS platform architecture. 
+First, we will overview Android and IOS platform architecture. 
 
 ### 1. Compilation Process
 
-**What is Compilation Process:**
+**What is the Compilation Process:**
 
 <img src="https://github.com/user-attachments/assets/b1c4a273-e0a2-4370-9a0b-708277584116" width="500"/>
 
@@ -35,11 +35,11 @@ So how to compile code on Android and IOS?
 #### Android
 
     Kotlin/Java → Bytecode Java(kolinc/javac) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
-_APK contain DEX !_
+_APK contains DEX !_
 #### IOS
 
     Swift/Object C → LLVM IR(CLang) → Assembly(LLVM) -> Ipa ->  Machine Code(Assembler) -> CPU/GPU
-_IPA contain Assembly !_
+_IPA contains Assembly !_
 
 
 ---
@@ -197,13 +197,13 @@ Move to the next frameworks
 
 ### Kotlin compiles 
 
-KMM Idea is allows you to share code across different platforms.
-=> It mean in KMM project native code and and Kotlin code work together.
-So how it work?
+KMM Idea allows you to share code across different platforms.
+=> It means in KMM project native code and Kotlin code works together.
+So how does it work?
 
 **Android**
 - Android mobile development has been Kotlin-first since Google I/O in 2019
-- Kotlinc can compile Kotlin into Bytecode Java so that other task base on Android native
+- Kotlinc can compile Kotlin into Bytecode Java so that other tasks based on Android native
 
         Kotlin → Bytecode Java(kolinc - Jvm ) → Dalvik bytecode (.dex)(Dx/D8/R8) -> APK → Machine Code (ART/Dalvik VM) -> CPU/GPU
 
@@ -226,7 +226,7 @@ Java code can be called from Kotlin in a natural way, and Kotlin code can be use
 Kotlin/Native provides bidirectional interoperability with Swift/Objective-C. You can both use Objective-C frameworks and libraries in Kotlin code, and Kotlin modules in Swift/Objective-C code.
 
 
-** How to let Kotlin-c know and compile to correct target? **
+** How do we let Kotlin-c know and compile it to the correct target? **
 - You should first declare a target to instruct Kotlin to compile code for that specific target. In Gradle, you declare targets using predefined DSL calls inside the kotlin {} block:
 
 ![image](https://github.com/user-attachments/assets/28ae94b5-e258-45c0-b88e-19b3112a8cbd)
