@@ -15,6 +15,7 @@ Thank you so much!
 - [Kotlin Multiplatform](#Kotlin-Multiplatform)
 - [React Native](#React-Native)
 - [Unity](#Unity)
+- [Comparison summary](#Comparison-summary)
 
 ## Native
 
@@ -509,31 +510,6 @@ For libraries that need deeper integration (high-performance graphics, ML infere
 | Custom JSI HostObjects    | New          | Yes   | Lazy / on-demand | High-perf libs (storage, animations) |
 | Fabric Native Components  | New          | Yes   | On mount       | Custom native UI views                 |
 
-### Comparison summary
-
-A quick comparison of the five approaches covered in this document:
-
-| Aspect                | Native (Android / iOS)         | Flutter                              | Kotlin Multiplatform                       | React Native                                  | Unity                                            |
-|-----------------------|--------------------------------|--------------------------------------|--------------------------------------------|-----------------------------------------------|--------------------------------------------------|
-| Language              | Kotlin/Java, Swift/ObjC        | Dart                                 | Kotlin (+ Swift/ObjC for iOS UI)           | JavaScript / TypeScript                       | C# (user code), C/C++ (engine)                   |
-| What ships in the app | Native machine code            | Native machine code (Dart AOT)       | Native machine code (Kotlin/Native + JVM)  | JS bundle or Hermes bytecode + JS engine      | Native machine code via IL2CPP (AOT) + engine    |
-| UI rendering          | Native views (drawn by OS)     | Custom canvas (Skia / Impeller)      | Native UI **or** Compose Multiplatform (Skia/Skiko) | Real native views, laid out with Yoga (Flexbox) | Own GPU surface (Vulkan/Metal); no native widgets |
-| Cross-platform UI?    | No                             | Yes — same widgets everywhere        | Optional (share logic, native UI by default) | Yes — same components map to native views     | Yes — Unity draws every pixel itself             |
-| Bridge to native APIs | Direct (it's the platform)     | Platform Channels, Dart FFI          | `expect`/`actual`, cinterop                | TurboModules (JSI) / Native Modules (Bridge)  | JNI (Android), P/Invoke + Obj-C++ (iOS)          |
-| Startup / TTI         | Best                           | Good (heavier binary)                | Native-like                                | Improved a lot by Hermes, still JS-bound      | Slower (engine init + asset load)                |
-| Runtime performance   | Best                           | Near-native, GPU-accelerated         | Near-native                                | Good; bound by JS thread and JS↔Native crossings | Continuous frame loop, GPU-bound (60+ FPS)    |
-| App size              | Smallest                       | Larger (engine + framework)          | Close to native                            | Engine + JS bundle (Hermes shrinks Android; on iOS it adds a few MB since JSC is system-provided) | Largest (engine + assets)                |
-| Look & feel           | 100% platform-native           | Custom; can mimic platform           | 100% platform-native (if using native UI)  | Platform-native (uses real native widgets)    | Not native — Unity's own UI system (UGUI / UI Toolkit) |
-| Ecosystem / libraries | Largest per-platform           | Large, growing                       | Smaller, growing                           | Very large (npm + RN community)               | Huge for games (Asset Store)                     |
-| Best fit              | Max performance, deep platform | Pixel-perfect identical UI everywhere | Share logic with separate native UIs       | Web/React teams shipping mobile fast          | Games, AR/VR, real-time 3D/2D                    |
-
-**Key intuition:**
-
-- If two apps look *identical* on iOS and Android, it is almost certainly **Flutter**.
-- If an app looks *native on each platform* but is clearly cross-platform (same release cadence, same features), it is very often **React Native**.
-- If the UI is platform-native and only the business logic is shared, it is likely **Kotlin Multiplatform**.
-- If the app is a game, AR/VR experience, or real-time 3D/2D simulation, it is almost certainly **Unity** (or Unreal).
-
 ## Unity
 
 - Unity is a **real-time engine** developed by Unity Technologies, primarily known as a **game engine** but also used for AR/VR, automotive HMI, architecture visualization, simulation, and animation/film.
@@ -912,3 +888,28 @@ The `MonoBehaviour` callbacks every Unity developer learns aren't a coincidence 
 
 A native app, a Flutter app, and a React Native app are all *guests* inside the platform's UI thread, reacting to events.
 A Unity app is the *host* of its own surface, running a self-driven render loop on top of the OS.
+
+## Comparison summary
+
+A quick comparison of the five approaches covered in this document:
+
+| Aspect                | Native (Android / iOS)         | Flutter                              | Kotlin Multiplatform                       | React Native                                  | Unity                                            |
+|-----------------------|--------------------------------|--------------------------------------|--------------------------------------------|-----------------------------------------------|--------------------------------------------------|
+| Language              | Kotlin/Java, Swift/ObjC        | Dart                                 | Kotlin (+ Swift/ObjC for iOS UI)           | JavaScript / TypeScript                       | C# (user code), C/C++ (engine)                   |
+| What ships in the app | Native machine code            | Native machine code (Dart AOT)       | Native machine code (Kotlin/Native + JVM)  | JS bundle or Hermes bytecode + JS engine      | Native machine code via IL2CPP (AOT) + engine    |
+| UI rendering          | Native views (drawn by OS)     | Custom canvas (Skia / Impeller)      | Native UI **or** Compose Multiplatform (Skia/Skiko) | Real native views, laid out with Yoga (Flexbox) | Own GPU surface (Vulkan/Metal); no native widgets |
+| Cross-platform UI?    | No                             | Yes — same widgets everywhere        | Optional (share logic, native UI by default) | Yes — same components map to native views     | Yes — Unity draws every pixel itself             |
+| Bridge to native APIs | Direct (it's the platform)     | Platform Channels, Dart FFI          | `expect`/`actual`, cinterop                | TurboModules (JSI) / Native Modules (Bridge)  | JNI (Android), P/Invoke + Obj-C++ (iOS)          |
+| Startup / TTI         | Best                           | Good (heavier binary)                | Native-like                                | Improved a lot by Hermes, still JS-bound      | Slower (engine init + asset load)                |
+| Runtime performance   | Best                           | Near-native, GPU-accelerated         | Near-native                                | Good; bound by JS thread and JS↔Native crossings | Continuous frame loop, GPU-bound (60+ FPS)    |
+| App size              | Smallest                       | Larger (engine + framework)          | Close to native                            | Engine + JS bundle (Hermes shrinks Android; on iOS it adds a few MB since JSC is system-provided) | Largest (engine + assets)                |
+| Look & feel           | 100% platform-native           | Custom; can mimic platform           | 100% platform-native (if using native UI)  | Platform-native (uses real native widgets)    | Not native — Unity's own UI system (UGUI / UI Toolkit) |
+| Ecosystem / libraries | Largest per-platform           | Large, growing                       | Smaller, growing                           | Very large (npm + RN community)               | Huge for games (Asset Store)                     |
+| Best fit              | Max performance, deep platform | Pixel-perfect identical UI everywhere | Share logic with separate native UIs       | Web/React teams shipping mobile fast          | Games, AR/VR, real-time 3D/2D                    |
+
+**Key intuition:**
+
+- If two apps look *identical* on iOS and Android, it is almost certainly **Flutter**.
+- If an app looks *native on each platform* but is clearly cross-platform (same release cadence, same features), it is very often **React Native**.
+- If the UI is platform-native and only the business logic is shared, it is likely **Kotlin Multiplatform**.
+- If the app is a game, AR/VR experience, or real-time 3D/2D simulation, it is almost certainly **Unity** (or Unreal).
