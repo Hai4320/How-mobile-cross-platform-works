@@ -14,6 +14,7 @@ Thank you so much!
 - [Flutter](#Flutter)
 - [Kotlin Multiplatform](#Kotlin-Multiplatform)
 - [React Native](#React-Native)
+- [Unity](#Unity)
 
 ## Native
 
@@ -251,3 +252,382 @@ Kotlin/Native provides bidirectional interoperability with Swift/Objective-C. Yo
 ## React Native
 
 React Native is an open-source framework developed by Facebook that allows developers to build cross-platform mobile applications using JavaScript and React. It enables developers to write a single codebase that runs on both Android and iOS, with access to native components to create a seamless, native-like experience.
+
+## Unity
+
+- Unity is a **real-time engine** developed by Unity Technologies, primarily known as a **game engine** but also used for AR/VR, automotive HMI, architecture visualization, simulation, and animation/film.
+- Cross-platform: Android, iOS, Windows, macOS, Linux, WebGL, PlayStation, Xbox, Nintendo Switch.
+- User code is written in **C#**; the engine core is written in **C/C++**.
+- Important framing for this document: Unity is **a game engine first**, not a typical mobile app framework. While React Native and KMP (Native UI) integrate into the host platform's UI system (`Activity` / `UIViewController`), Unity (and to an extent Flutter) **takes over the entire surface** and renders its own pixels straight to the GPU. Crucially, Unity runs a **continuous frame loop** instead of an event-driven UI loop.
+
+### C# and the Scripting Backend
+
+Unity does not compile your C# straight to machine code. C# first becomes .NET **Intermediate Language (IL)**, and what happens next depends on which **Scripting Backend** you target. Unity ships two backends, and they exist for very different reasons.
+
+**Shared front-end (both backends)**
+
+Regardless of the backend, every Unity build starts with the same steps:
+
+1. **[Roslyn](https://github.com/dotnet/roslyn)** (the official C# compiler) compiles every `.cs` file into IL inside `.dll` assemblies — exactly like a normal .NET application.
+2. **Assembly stripping (managed code stripping)** scans the IL and removes classes/methods that the game never calls, including big chunks of the .NET base class library you didn't use. This is critical on mobile because the full .NET surface is large.
+3. From here the two backends diverge.
+
+**Mono — the JIT backend**
+
+- Mono is an open-source implementation of the .NET runtime that Unity has shipped with for years.
+- It executes IL **Just-In-Time (JIT)**: at runtime the Mono VM translates IL into machine code on-the-fly.
+- Mono is what the **Editor** uses (so Play Mode can hot-reload scripts) and what most **development builds** use.
+- Pros: fast iteration, smaller build, supports runtime code generation.
+- Cons: slower steady-state performance than native, and not allowed on iOS (Apple forbids JIT in App Store apps) or on most consoles.
+
+**IL2CPP — the AOT backend**
+
+- IL2CPP (*Intermediate Language To C++*) is Unity's proprietary **Ahead-of-Time** toolchain.
+- Instead of running IL at runtime, IL2CPP converts the IL into **C++** source code at build time. Unity's IL2CPP toolchain reads each `.dll` and emits equivalent C++ that calls into a small C++ runtime (`libil2cpp`) for things like GC and reflection.
+- The generated C++ is then handed to the platform's native toolchain (NDK/Clang on Android, Clang/LLVM on iOS) and compiled to machine code.
+- IL2CPP is **mandatory** for iOS (no JIT possible) and for **64-bit Android** binaries on the Play Store (a Google Play submission requirement since 2019).
+- Pros: native-level performance, smaller startup overhead, better code stripping, harder to reverse-engineer than IL.
+- Cons: longer build times, no runtime code generation (so dynamic features like `System.Reflection.Emit` don't work).
+
+**Pipeline overview**
+
+      Your C# scripts (.cs)
+              │
+              ▼
+        Roslyn compiler
+              │
+              ▼
+          IL (.dll)
+              │
+              ▼
+      Assembly stripping
+              │
+        ┌───────────┴───────────────────┐
+        ▼                               ▼
+   Mono backend                    IL2CPP backend
+   JIT compile IL at runtime       IL → C++ → native machine code (at build time)
+   (Editor, dev builds, some       (iOS always, 64-bit Android,
+    Android builds)                 consoles)
+
+#### Android
+
+**Build pipeline (IL2CPP path)**
+
+1. C# scripts → Roslyn → IL `.dll`.
+2. **IL2CPP** converts the IL into C++ source.
+3. The generated C++ is compiled together with the Unity engine's own C++ sources by the **Android NDK / Clang** into native shared libraries (`.so`) for each target ABI (typically `arm64-v8a`, sometimes `armeabi-v7a`):
+   - `libunity.so` — the engine core itself.
+   - `libil2cpp.so` — the IL2CPP runtime (GC, reflection helpers, etc.).
+   - `libmain.so` — a small launcher that ties them together.
+4. Unity emits a **Gradle Android project** containing:
+   - The `.so` libraries above (under `lib/<abi>/`).
+   - Game **Assets** — textures, models, audio — packed into Unity's binary asset format under `assets/bin/Data/`.
+   - `AndroidManifest.xml` — declares `UnityPlayerActivity` as the launcher activity.
+   - Any third-party Android plugins (`.aar` / `.jar`).
+5. Gradle assembles, signs, and produces the **APK** (install directly) or **AAB** (upload to Play Store).
+
+**Runtime**
+
+When the user taps the icon:
+
+1. Android starts the launcher activity defined in the manifest — `UnityPlayerActivity` (a normal Java/Kotlin `Activity`).
+2. The activity calls `System.loadLibrary("unity")`, which loads `libunity.so` and the IL2CPP libraries into the process.
+3. Through **JNI (Java Native Interface)**, control is handed to the C++ engine. Unity attaches its own `SurfaceView` to the activity's window — from this point on, the engine owns the surface.
+4. The engine starts the **game loop**: `Input → Update (C# user code via IL2CPP) → Physics → Render (Vulkan / OpenGL ES) → repeat`.
+5. When user C# code needs to call an Android API (e.g. show a toast, read sensor data), it goes the other direction through JNI: C# → `AndroidJavaObject` → Java/Kotlin → Android SDK.
+
+      C# → IL (.dll) → C++ (IL2CPP) → .so (NDK / Clang) → APK/AAB → UnityPlayerActivity → JNI → libunity.so → game loop
+
+#### iOS
+
+iOS has one important constraint: **Apple does not allow JIT compilation in App Store apps**. That means **Mono is not an option** — every iOS build must use **IL2CPP**.
+
+**Build pipeline — Stage A: Unity generates an Xcode project**
+
+Unity does not produce an `.ipa` directly. Instead it produces a **full Xcode project** that you (or your CI) then build on macOS:
+
+1. C# scripts → Roslyn → IL `.dll`.
+2. **IL2CPP** converts the IL into thousands of C++ source files (`.cpp` / `.h`).
+3. Unity writes out an Xcode project containing:
+   - The IL2CPP-generated C++.
+   - The Unity engine's own C++ sources / pre-compiled libraries.
+   - Game **Assets** (Unity binary asset format).
+   - `main.mm` (an Objective-C++ entry point) and the `UnityAppController` boilerplate.
+   - Any iOS native plugins you've added (`.framework`, `.a`, `.m`, `.mm`, `.swift`).
+
+**Build pipeline — Stage B: Xcode produces the IPA**
+
+This stage runs on macOS using the standard Apple toolchain:
+
+1. **Clang / LLVM** compiles the entire pile of C++ to ARM64 machine code.
+2. The linker groups the output into two artifacts:
+   - **`UnityFramework.framework`** — a dynamic library containing the engine + your IL2CPP-compiled game code + the asset loader. This is where the bulk of the binary lives.
+   - **`Unity-iPhone`** — a thin launcher executable whose only real job is to load `UnityFramework` and hand off control.
+3. The app is **code-signed** using your Apple Developer certificate and a Provisioning Profile.
+4. Xcode packages everything into an **`.ipa`** for distribution.
+
+**Runtime**
+
+1. iOS launches the `Unity-iPhone` executable. Execution enters `main.mm`.
+2. `main.mm` calls `UnityFrameworkLoad()`, which loads `UnityFramework.framework` into memory.
+3. The framework instantiates **`UnityAppController`** — a `UIApplicationDelegate` subclass — and the OS hands the standard `application:didFinishLaunchingWithOptions:` lifecycle to it.
+4. `UnityAppController` creates the window, attaches Unity's **`CAMetalLayer`** (or a `MTKView`) as the rendering surface, and starts the engine.
+5. The engine starts the **game loop**: `Input → Update (C# user code via IL2CPP) → Physics → Render (Metal) → repeat`.
+6. When user C# code needs to call an iOS API (e.g. read GPS, open a URL), it goes through `[DllImport("__Internal")]` (P/Invoke) into Objective-C / Swift functions you've added to the Xcode project.
+
+      C# → IL (.dll) → C++ (IL2CPP) → Xcode project → Clang/LLVM → ARM64 → UnityFramework.framework + Unity-iPhone → IPA → main.mm → UnityFrameworkLoad → UnityAppController → game loop
+
+### Render UI
+
+Unity does **not** map components to native UI like React Native, nor does it embed itself inside a Flutter-style `FlutterView` next to other native views. Unity **takes over a full drawing surface and renders every pixel itself**, all the way from the 3D scene down to the on-screen buttons.
+
+**Where Unity draws**
+
+- Android: a **`SurfaceView`** (or `TextureView`) attached to `UnityPlayerActivity`. The `Surface` is given to the engine's C++ side, which initializes a Vulkan or OpenGL ES context on it.
+- iOS: a **`CAMetalLayer`** (typically wrapped in `MTKView`), owned by `UnityAppController`. The engine renders to this layer through Metal.
+
+In both cases the entire visible content of the app is a single GPU surface drawn by Unity. The OS does not lay out any widgets inside it.
+
+**Render Pipelines**
+
+Unity ships three rendering pipelines and you pick one per project:
+
+- **Built-in Render Pipeline (BRP)** — the original, simple, harder to customize.
+- **URP — Universal Render Pipeline** — the modern default for mobile/AR/VR. Performance-tuned for limited GPUs.
+- **HDRP — High Definition Render Pipeline** — desktop/console-class fidelity. Not for mobile.
+
+URP is what almost every modern mobile Unity project uses.
+
+**Graphics APIs by platform**
+
+| Platform | Primary API | Fallback |
+|----------|-------------|----------|
+| Android  | **Vulkan**  | OpenGL ES 3.x |
+| iOS      | **Metal**   | (no fallback — OpenGL ES is deprecated on iOS) |
+
+**The rendering pipeline (per frame)**
+
+      Scene (GameObjects with Mesh/Skinned/Sprite/Particle renderers + Cameras)
+              │
+              ▼
+      Culling                ◄── frustum + occlusion: skip what each camera can't see
+              │
+              ▼
+      Batching               ◄── static / dynamic / SRP batching: merge draw calls
+              │
+              ▼
+      Sort draw calls        ◄── front-to-back for opaques, back-to-front for transparents
+              │
+              ▼
+      Build CommandBuffer    ◄── shader bindings, uniforms, textures, draw commands
+              │
+              ▼
+      Graphics API           ◄── Vulkan / OpenGL ES on Android, Metal on iOS
+              │
+              ▼
+      GPU                    ◄── vertex shader → rasterizer → fragment shader → blend
+              │
+              ▼
+      Screen
+
+**What about UI (buttons, HUD, text)?**
+
+Unity has its own UI system — these are *not* `UIButton` or `android.widget.Button`. They are GameObjects rendered by the same pipeline above:
+
+- **UGUI (Canvas-based)** — the classic Unity UI. Every UI element lives under a `Canvas`, gets rendered as quads with `Image` / `Text` / `TextMeshPro` components.
+- **UI Toolkit** — a newer, web-inspired system using UXML (markup) + USS (styles), retained-mode, better for editor tools and complex UI.
+- **IMGUI** — immediate-mode, used mainly for Editor tooling.
+
+**Consequence**
+
+Because Unity draws everything itself:
+
+- **Pro:** pixel-identical rendering across every platform; full GPU control; can use custom shaders for anything.
+- **Con:** does not inherit native look & feel, accessibility, IME behavior, or platform UI conventions — you reimplement those if you need them.
+
+### Native API
+
+Unity ships a large standard API (rendering, physics, input, audio, networking, file I/O), but for anything platform-specific — push notifications, IAP, ARKit/ARCore, AdMob, BLE, the camera, deep system services — your C# code has to reach into the platform. The mechanisms are different on each side.
+
+#### Android — JNI
+
+C# in Unity talks to Android Java/Kotlin code through **JNI (Java Native Interface)**. Unity wraps JNI in two helper classes you use from C#:
+
+- **`AndroidJavaClass`** — represents a Java class (static methods / fields).
+- **`AndroidJavaObject`** — represents a Java instance (constructor + instance methods).
+
+Typical Android plugin formats:
+
+- **`.jar`** — compiled Java classes.
+- **`.aar`** — Android Archive: Java/Kotlin code + resources + an `AndroidManifest.xml`. The standard format.
+
+Calls flow like this:
+
+      C# code in Unity
+          │  AndroidJavaObject / AndroidJavaClass
+          ▼
+      libunity.so  ──JNI──►  Java/Kotlin code in your .aar / Android SDK
+                                  │
+                                  ▼
+                          Android Framework APIs (Camera2, Bluetooth, etc.)
+
+#### iOS — P/Invoke and Objective-C++
+
+iOS plugins are not invoked through anything as ceremonial as JNI. Instead Unity uses the standard .NET **P/Invoke** mechanism: `[DllImport]`.
+
+- C# declares an external function:
+  - `[DllImport("__Internal")] static extern void MyNativeFunc();`
+  - The special name `"__Internal"` tells the runtime: "this symbol is statically linked into the main binary" — which is how all iOS plugins are shipped (no dynamic loading of arbitrary code, by Apple's rules).
+- The matching symbol is implemented in **Objective-C / Objective-C++ / Swift** files (`.m`, `.mm`, `.swift`) that Unity drops into the generated Xcode project.
+- For richer interop (callbacks, structs, classes), authors typically write **Objective-C++ (`.mm`)** wrappers that bridge between the C ABI required by P/Invoke and the Objective-C / Swift APIs of iOS.
+
+iOS plugin formats:
+
+- Source files (`.m`, `.mm`, `.swift`) placed under `Assets/Plugins/iOS/`.
+- Static libraries (`.a`).
+- **`.framework`** / **`.xcframework`** — the modern packaging format.
+
+Calls flow like this:
+
+      C# code in Unity
+          │  [DllImport("__Internal")]
+          ▼
+      UnityFramework  ──P/Invoke──►  Objective-C / Swift in the Xcode project
+                                          │
+                                          ▼
+                                  iOS Frameworks (UIKit, AVFoundation, CoreLocation, …)
+
+#### Going lower: plain C/C++ via P/Invoke
+
+Both platforms also let you call plain C/C++ libraries:
+
+- Compile your C/C++ into `.so` (Android) or `.a` / `.dylib` (iOS).
+- Drop it into `Assets/Plugins/<platform>/`.
+- Call from C# via `[DllImport("LibName")]`.
+
+This is conceptually the same idea as **Dart FFI** in Flutter or **`expect`/`actual` + cinterop** in Kotlin Multiplatform: a C ABI is the universal bridge.
+
+### Unity engine architecture
+
+A Unity build is best understood as **four stacked layers**. From the developer-facing top to the hardware-facing bottom:
+
+**1. Editor & User Scripting**
+
+This is the layer the developer sees and touches.
+
+- **Unity Editor** — the IDE itself (Scene view, Hierarchy, Inspector, Project window). Not shipped with the runtime; only used during development.
+- **Scene Graph** — the hierarchy of `GameObject`s in the current scene. Each `GameObject` is a container of `Component`s, the most important of which is `Transform` (position/rotation/scale, parent/child links).
+- **User Scripts (C#)** — your gameplay code. Most scripts inherit from **`MonoBehaviour`**, which gives them access to lifecycle hooks (`Awake`, `Start`, `Update`, …) called by the engine each frame.
+
+**2. Scripting Runtime**
+
+The layer that actually executes the C# in your scripts. This is the **Mono vs IL2CPP** choice covered earlier.
+
+- In the **Editor and dev builds**, this is **Mono** — IL is JIT-compiled at runtime.
+- In **mobile release builds**, this is **IL2CPP** — IL has already been transpiled to C++ and compiled to native code at build time; at runtime there is no IL execution, just a small `libil2cpp` runtime for GC and reflection helpers.
+
+This layer also includes the **Garbage Collector** (the Boehm GC in Unity, incremental since Unity 2019). GC behavior is a major performance topic in Unity because GC spikes show up as dropped frames.
+
+**3. Engine Core (Native C++)**
+
+The heart of Unity. Written in C++ for performance and shipped as native code on every platform (`libunity.so` on Android, `UnityFramework.framework` on iOS). The Engine Core groups several subsystems:
+
+| Subsystem      | Responsibility                                              | Underlying library/API (examples)    |
+|----------------|-------------------------------------------------------------|--------------------------------------|
+| **Graphics**   | Scene rendering, shaders, lighting, post-processing         | Vulkan, OpenGL ES, Metal, DirectX    |
+| **Physics**    | Collisions, rigid bodies, joints, raycasts                  | **PhysX** (3D), **Box2D** (2D)       |
+| **Audio**      | Mixing, 3D positional audio, effects, streaming             | **FMOD**                             |
+| **Animation**  | Skeletal animation, blend trees, state machines             | **Mecanim**                          |
+| **Input**      | Touch, keyboard, gamepad, sensors                           | Legacy Input Manager / New Input System |
+| **Asset & Scene loading** | Load/unload scenes, asset bundles, Addressables  | Internal + Addressables package      |
+| **Networking** | Low-level transport, high-level game networking             | Unity Transport, Netcode for GameObjects |
+
+C# code on layer 2 talks to these subsystems through the **Unity scripting API** (e.g. `Rigidbody.AddForce`, `AudioSource.Play`). Under the hood, those calls cross from managed code into native C++ via P/Invoke-like internal calls.
+
+**4. Platform Abstraction Layer (PAL)**
+
+The thinnest, lowest layer. Its job is to hide platform differences from the Engine Core so the same C++ codebase can run on Android, iOS, Windows, macOS, consoles, etc.
+
+The PAL wraps:
+
+- **Graphics** — uniform interface over Vulkan / Metal / OpenGL ES / DirectX.
+- **Windowing & surfaces** — `SurfaceView` on Android, `CAMetalLayer` on iOS, `HWND` on Windows.
+- **Input devices** — touch on mobile, keyboard/mouse on desktop, gamepads everywhere.
+- **Audio output** — OpenSL ES / AAudio on Android, AVAudioEngine on iOS.
+- **File system, threading, networking** — anything the OS exposes differently.
+
+The PAL is also where Unity hands off to the host activity / view controller (JNI on Android, Objective-C++ on iOS), which is what makes the **Game Loop vs Event Loop** discussion below possible.
+
+**Putting it together**
+
+      ┌──────────────────────────────────────────────────────────┐
+      │ 1. Editor & User Scripting                               │
+      │    Unity Editor · Scene graph · MonoBehaviour (C#)       │
+      └──────────────┬───────────────────────────────────────────┘
+                     │
+      ┌──────────────▼───────────────────────────────────────────┐
+      │ 2. Scripting Runtime                                     │
+      │    Mono (JIT)    or    IL2CPP (AOT) + libil2cpp + GC     │
+      └──────────────┬───────────────────────────────────────────┘
+                     │
+      ┌──────────────▼───────────────────────────────────────────┐
+      │ 3. Engine Core (C++)                                     │
+      │    Graphics · Physics · Audio · Animation · Input · …    │
+      └──────────────┬───────────────────────────────────────────┘
+                     │
+      ┌──────────────▼───────────────────────────────────────────┐
+      │ 4. Platform Abstraction Layer                            │
+      │    Vulkan/Metal · JNI · CoreAudio · OS file/thread/net   │
+      └──────────────┬───────────────────────────────────────────┘
+                     │
+                  Android / iOS / Windows / macOS / consoles
+
+### Game Loop vs Event Loop — why Unity is different
+
+This is the punchline of the whole Unity section, and the single biggest reason a Unity app feels different from a Flutter / React Native / native app on the same device.
+
+**Two models for "how the program runs"**
+
+- **Reactive (event-driven)** — the model used by **native mobile apps, Flutter, React Native, KMP UIs**, and basically every traditional mobile/desktop GUI. The app is **idle by default**. The OS delivers events (a touch, a network response, a timer firing) and the app reacts: handle the event, maybe re-layout / re-render the parts that changed, then go back to idle. **Dirty-region rendering** — only the parts of the screen that changed get redrawn.
+
+- **Continuous (game loop)** — the model used by Unity, Unreal, and almost every game engine. The app is **never idle while visible**. It runs a tight loop that, every frame, does the full pipeline: read input, advance simulation, redraw everything, present to the display, repeat — typically at **60 FPS on mobile** (16.6 ms per frame), 90/120 FPS on high-refresh devices.
+
+**What Unity does every frame**
+
+The frame loop, simplified, looks like this on every visible frame:
+
+      while (app is visible) {
+          poll input             // touches, sensors, gamepads
+          run FixedUpdate(s)     // physics steps, fixed time delta
+          run Update             // user logic, animations, AI
+          run LateUpdate         // camera follow, IK, post-Update fixes
+          render                 // culling → batching → draw calls → GPU
+          present                // hand finished frame to the display
+      }
+
+**MonoBehaviour lifecycle as hooks into the loop**
+
+The `MonoBehaviour` callbacks every Unity developer learns aren't a coincidence — they are just **named hooks into the frame loop above**:
+
+| Hook                  | Where it fires                                                          |
+|-----------------------|-------------------------------------------------------------------------|
+| `Awake()`             | Once, when the script instance is loaded (before any `Start`).          |
+| `OnEnable()`          | When the GameObject/component becomes active.                           |
+| `Start()`             | Once, just before the first `Update` of that script.                    |
+| `FixedUpdate()`       | Each physics step (default 50 Hz, decoupled from frame rate).           |
+| `Update()`            | Once per **frame** — variable interval depending on FPS.                |
+| `LateUpdate()`        | Once per frame, **after all `Update`s** — used for camera follow, etc.  |
+| `OnDisable()` / `OnDestroy()` | On deactivation / destruction.                                  |
+
+**Consequences of the continuous model**
+
+- **Higher CPU/GPU usage and faster battery drain.** Even a "still" Unity screen is doing 60 full redraws per second. A native app showing the same screen would draw it once and idle.
+- **Lower input latency.** Because the loop is always running, the gap between a touch and the next rendered frame is at most one frame — critical for games.
+- **No dirty-region rendering.** Unity throws away the entire previous frame and redraws every pixel. This is why mobile Unity games warm up the device noticeably faster than native apps.
+- **Frame budget thinking.** Everything on layer 1 (your C# code) must fit inside ~16 ms together with the engine's own work. This is why GC spikes, `Resources.Load` on the main thread, and excessive logging or heavy main-thread logic all show up as stutters.
+- **Backgrounding behavior is explicit.** When the OS sends the app to background, Unity pauses the loop (`OnApplicationPause`) — you don't get the implicit "do nothing" idle of a native app because there *is* no idle state in the first place.
+
+**One-line summary of where Unity sits**
+
+A native app, a Flutter app, and a React Native app are all *guests* inside the platform's UI thread, reacting to events.
+A Unity app is the *host* of its own surface, running a self-driven render loop on top of the OS.
