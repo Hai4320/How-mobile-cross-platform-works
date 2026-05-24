@@ -268,7 +268,7 @@ Unlike Flutter (Dart → machine code) or Kotlin Multiplatform (Kotlin → machi
 
 **JavaScript engines used by React Native**
 
-- **[JavaScriptCore (JSC)](https://developer.apple.com/documentation/javascriptcore):** the historical default. JSC is Apple's open-source JavaScript engine that ships with iOS (used by Safari). On Android, React Native bundles its own copy of JSC. JSC interprets and JIT-compiles JS at runtime — but note that on iOS, third-party apps are not allowed to JIT, so JSC runs in interpreter mode there, which hurts startup and runtime performance.
+- **[JavaScriptCore (JSC)](https://developer.apple.com/documentation/javascriptcore):** the historical default. JSC is Apple's open-source JavaScript engine that ships with iOS (used by Safari). On Android, React Native bundles its own copy of JSC. JSC interprets and JIT-compiles JS at runtime — but note that on iOS, third-party apps are not allowed to JIT (the OS forbids allocating executable memory at runtime for security reasons), so JSC runs in interpreter mode there, which hurts startup and runtime performance. This security restriction is precisely why a bytecode-first engine like Hermes pays off so much on iOS.
 - **[Hermes](https://hermesengine.dev/):** an open-source JS engine built by Meta specifically for React Native. Default since React Native 0.70 (Sep 2022). Key differences from JSC:
   - **Ahead-of-Time (AOT) compilation:** JS source is compiled to **Hermes Bytecode (`.hbc`)** at *build time*, not at runtime. The app ships bytecode, not JS text.
   - **No JIT:** Hermes is a bytecode interpreter optimized for fast startup and low memory, accepting slower steady-state throughput as a trade-off — a sensible trade on mobile where TTI (time-to-interactive) matters more than long-running benchmarks.
@@ -416,7 +416,7 @@ The consequence is that React Native apps inherit native look, feel, accessibili
 | `<Image>`              | `UIImageView`          | `ImageView`              |
 | `<ScrollView>`         | `UIScrollView`         | `ScrollView`             |
 | `<TextInput>`          | `UITextField`          | `EditText`               |
-| `<TouchableOpacity>`   | composed `UIView`      | composed `ViewGroup`     |
+| `<ActivityIndicator>`  | `UIActivityIndicatorView` | `ProgressBar`         |
 
 **Rendering pipeline (New Architecture / Fabric)**
 
@@ -521,7 +521,7 @@ A quick comparison of the four approaches covered in this document:
 | Bridge to native APIs | Direct (it's the platform)     | Platform Channels, Dart FFI          | `expect`/`actual`, cinterop                | TurboModules (JSI) / Native Modules (Bridge)  |
 | Startup / TTI         | Best                           | Good (heavier binary)                | Native-like                                | Improved a lot by Hermes, still JS-bound      |
 | Runtime performance   | Best                           | Near-native, GPU-accelerated         | Near-native                                | Good; bound by JS thread and JS↔Native crossings |
-| App size              | Smallest                       | Larger (engine + framework)          | Close to native                            | Engine + JS bundle (Hermes shrinks both)      |
+| App size              | Smallest                       | Larger (engine + framework)          | Close to native                            | Engine + JS bundle (Hermes shrinks Android; on iOS it adds a few MB since JSC is system-provided) |
 | Look & feel           | 100% platform-native           | Custom; can mimic platform           | 100% platform-native (if using native UI)  | Platform-native (uses real native widgets)    |
 | Ecosystem / libraries | Largest per-platform           | Large, growing                       | Smaller, growing                           | Very large (npm + RN community)               |
 | Best fit              | Max performance, deep platform | Pixel-perfect identical UI everywhere | Share logic with separate native UIs       | Web/React teams shipping mobile fast          |
