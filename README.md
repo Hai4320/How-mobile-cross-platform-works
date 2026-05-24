@@ -254,7 +254,7 @@ React Native is an open-source framework developed by Facebook that allows devel
 
 - Open-source, supported by Meta (Facebook).
 - Uses JavaScript + React (JSX) as the development language.
-- Unlike Flutter, React Native does not draw its own widgets — it maps React components to **real native UI components** (UIView on iOS, android.view on Android).
+- Unlike Flutter, React Native does not draw its own widgets — it maps React components to **real native UI components** (UIView on iOS, android.view.View on Android).
 
 ### JavaScript Engine and how JS code runs on mobile
 
@@ -262,14 +262,14 @@ Unlike Flutter (Dart → machine code) or Kotlin Multiplatform (Kotlin → machi
 
 **The bundling pipeline (Metro)**
 
-- Metro is React Native's JavaScript bundler. It takes the entry file (typically `index.js`), resolves every `import`/`require`, transforms JSX/TypeScript via Babel, and produces a single JavaScript bundle.
+- [Metro](https://metrobundler.dev/) is React Native's JavaScript bundler. It takes the entry file (typically `index.js`), resolves every `import`/`require`, transforms JSX/TypeScript via Babel, and produces a single JavaScript bundle.
 - In development, Metro serves the bundle over HTTP and supports Fast Refresh.
 - In release builds, the bundle is packaged inside the APK (`assets/index.android.bundle`) or IPA (`main.jsbundle`).
 
 **JavaScript engines used by React Native**
 
-- **JavaScriptCore (JSC):** the historical default. JSC is Apple's open-source JavaScript engine that ships with iOS (used by Safari). On Android, React Native bundles its own copy of JSC. JSC interprets and JIT-compiles JS at runtime — but note that on iOS, third-party apps are not allowed to JIT, so JSC runs in interpreter mode there, which hurts startup and runtime performance.
-- **Hermes:** an open-source JS engine built by Meta specifically for React Native. Default since React Native 0.70 (Sep 2022). Key differences from JSC:
+- **[JavaScriptCore (JSC)](https://developer.apple.com/documentation/javascriptcore):** the historical default. JSC is Apple's open-source JavaScript engine that ships with iOS (used by Safari). On Android, React Native bundles its own copy of JSC. JSC interprets and JIT-compiles JS at runtime — but note that on iOS, third-party apps are not allowed to JIT, so JSC runs in interpreter mode there, which hurts startup and runtime performance.
+- **[Hermes](https://hermesengine.dev/):** an open-source JS engine built by Meta specifically for React Native. Default since React Native 0.70 (Sep 2022). Key differences from JSC:
   - **Ahead-of-Time (AOT) compilation:** JS source is compiled to **Hermes Bytecode (`.hbc`)** at *build time*, not at runtime. The app ships bytecode, not JS text.
   - **No JIT:** Hermes is a bytecode interpreter optimized for fast startup and low memory, accepting slower steady-state throughput as a trade-off — a sensible trade on mobile where TTI (time-to-interactive) matters more than long-running benchmarks.
   - **Smaller heap, smaller app size, faster TTI**, and identical behavior on iOS and Android (no JIT-mode mismatch).
@@ -277,7 +277,7 @@ Unlike Flutter (Dart → machine code) or Kotlin Multiplatform (Kotlin → machi
 **Compilation / packaging pipeline**
 
       JS/JSX → Babel → Metro bundler → JS bundle
-                                        ├─ (JSC path)   .jsbundle  → APK/IPA → interpreted/JIT by JSC at runtime
+                                        ├─ (JSC path)   .jsbundle  → APK/IPA → interpreted (iOS) / JIT (Android) by JSC at runtime
                                         └─ (Hermes path) hermesc → .hbc  → APK/IPA → executed by Hermes interpreter at runtime
 
 So:
@@ -302,7 +302,7 @@ This separation is the reason a React Native app stays responsive even while hea
 **How the Bridge works**
 
 - The Bridge is an **asynchronous, batched, serialized** message channel between JS and Native.
-- Every call across the boundary (e.g. `fetch`, `setState` that produces a UI update, calling `CameraModule.takePicture()`) is:
+- Every call across the boundary (e.g. `fetch`, UI mutations dispatched by the UIManager after reconciliation, calling `CameraModule.takePicture()`) is:
   1. Serialized to **JSON**.
   2. Placed on a message queue.
   3. Delivered asynchronously to the other side, where it is deserialized and dispatched.
