@@ -258,7 +258,7 @@ React Native is an open-source framework developed by Facebook that allows devel
 - Unity is a **real-time engine** developed by Unity Technologies, primarily known as a **game engine** but also used for AR/VR, automotive HMI, architecture visualization, simulation, and animation/film.
 - Cross-platform: Android, iOS, Windows, macOS, Linux, WebGL, PlayStation, Xbox, Nintendo Switch.
 - User code is written in **C#**; the engine core is written in **C/C++**.
-- Important framing for this document: Unity is **a game engine first**, not a typical mobile app framework. Unlike Flutter / React Native / KMP — which all integrate into the host platform's UI system (`Activity` / `UIViewController`) — Unity **takes over the entire surface**, renders its own pixels straight to the GPU, and runs a **continuous frame loop** instead of an event-driven UI loop.
+- Important framing for this document: Unity is **a game engine first**, not a typical mobile app framework. While React Native and KMP (Native UI) integrate into the host platform's UI system (`Activity` / `UIViewController`), Unity (and to an extent Flutter) **takes over the entire surface** and renders its own pixels straight to the GPU. Crucially, Unity runs a **continuous frame loop** instead of an event-driven UI loop.
 
 ### C# and the Scripting Backend
 
@@ -268,7 +268,7 @@ Unity does not compile your C# straight to machine code. C# first becomes .NET *
 
 Regardless of the backend, every Unity build starts with the same steps:
 
-1. **Roslyn** (the official C# compiler) compiles every `.cs` file into IL inside `.dll` assemblies — exactly like a normal .NET application.
+1. **[Roslyn](https://github.com/dotnet/roslyn)** (the official C# compiler) compiles every `.cs` file into IL inside `.dll` assemblies — exactly like a normal .NET application.
 2. **Assembly stripping (managed code stripping)** scans the IL and removes classes/methods that the game never calls, including big chunks of the .NET base class library you didn't use. This is critical on mobile because the full .NET surface is large.
 3. From here the two backends diverge.
 
@@ -278,12 +278,12 @@ Regardless of the backend, every Unity build starts with the same steps:
 - It executes IL **Just-In-Time (JIT)**: at runtime the Mono VM translates IL into machine code on-the-fly.
 - Mono is what the **Editor** uses (so Play Mode can hot-reload scripts) and what most **development builds** use.
 - Pros: fast iteration, smaller build, supports runtime code generation.
-- Cons: slower steady-state perf than native, and not allowed on iOS (Apple forbids JIT in App Store apps) or on most consoles.
+- Cons: slower steady-state performance than native, and not allowed on iOS (Apple forbids JIT in App Store apps) or on most consoles.
 
 **IL2CPP — the AOT backend**
 
 - IL2CPP (*Intermediate Language To C++*) is Unity's proprietary **Ahead-of-Time** toolchain.
-- Instead of running IL at runtime, IL2CPP converts the IL into **C++** source code at build time. Unity's `il2cpp.exe` tool reads each `.dll` and emits equivalent C++ that calls into a small C++ runtime (`libil2cpp`) for things like GC and reflection.
+- Instead of running IL at runtime, IL2CPP converts the IL into **C++** source code at build time. Unity's IL2CPP toolchain reads each `.dll` and emits equivalent C++ that calls into a small C++ runtime (`libil2cpp`) for things like GC and reflection.
 - The generated C++ is then handed to the platform's native toolchain (NDK/Clang on Android, Clang/LLVM on iOS) and compiled to machine code.
 - IL2CPP is **mandatory** for iOS (no JIT possible) and for **64-bit Android** binaries on the Play Store (a Google Play submission requirement since 2019).
 - Pros: native-level performance, smaller startup overhead, better code stripping, harder to reverse-engineer than IL.
@@ -302,12 +302,12 @@ Regardless of the backend, every Unity build starts with the same steps:
               ▼
       Assembly stripping
               │
-        ┌─────┴─────────────────────┐
-        │ Mono backend              │ IL2CPP backend
-        ▼                           ▼
-      JIT compile IL at runtime    IL → C++ → native machine code (at build time)
-      (Editor, dev builds, some    (iOS always, 64-bit Android,
-       Android builds)              consoles)
+        ┌───────────┴───────────────────┐
+        ▼                               ▼
+   Mono backend                    IL2CPP backend
+   JIT compile IL at runtime       IL → C++ → native machine code (at build time)
+   (Editor, dev builds, some       (iOS always, 64-bit Android,
+    Android builds)                 consoles)
 
 #### Android
 
@@ -624,7 +624,7 @@ The `MonoBehaviour` callbacks every Unity developer learns aren't a coincidence 
 - **Higher CPU/GPU usage and faster battery drain.** Even a "still" Unity screen is doing 60 full redraws per second. A native app showing the same screen would draw it once and idle.
 - **Lower input latency.** Because the loop is always running, the gap between a touch and the next rendered frame is at most one frame — critical for games.
 - **No dirty-region rendering.** Unity throws away the entire previous frame and redraws every pixel. This is why mobile Unity games warm up the device noticeably faster than native apps.
-- **Frame budget thinking.** Everything on layer 1 (your C# code) must fit inside ~16 ms together with the engine's own work. This is why GC spikes, `Resources.Load` on the main thread, and chatty Inspector debugging all show up as stutters.
+- **Frame budget thinking.** Everything on layer 1 (your C# code) must fit inside ~16 ms together with the engine's own work. This is why GC spikes, `Resources.Load` on the main thread, and excessive logging or heavy main-thread logic all show up as stutters.
 - **Backgrounding behavior is explicit.** When the OS sends the app to background, Unity pauses the loop (`OnApplicationPause`) — you don't get the implicit "do nothing" idle of a native app because there *is* no idle state in the first place.
 
 **One-line summary of where Unity sits**
